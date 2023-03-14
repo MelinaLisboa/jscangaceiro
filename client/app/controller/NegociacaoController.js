@@ -8,28 +8,21 @@ class NegociacaoController {
 
     const self = this
 
-    //Agora é um Proxy!
-    this._negociacoes = new Proxy(new Negociacoes(), {
-      get(target, prop, receiver) {
-        if (
-          typeof target[prop] == typeof Function &&
-          ['adiciona', 'esvazia'].includes(prop)
-        ) {
-          return function () {
-            console.log(`${prop} disparou a armadilha.`)
-            target[prop].apply(target, arguments) //target: é a instância real de Negociacoes
-            self._negociacoesView.update(target)
-          }
-        } else {
-          return target[prop]
-        }
-      },
-    })
+    //Cria o proxy com o auxilio de ProxyFactory
+    this._negociacoes = ProxyFactory.create(
+      new Negociacoes(),
+      ['adiciona', 'esvazia'],
+      model => this._negociacoesView.update(model)
+    )
 
     this._negociacoesView = new NegociacoesView('#negociacoes')
     this._negociacoesView.update(this._negociacoes)
 
-    this._mensagem = new Mensagem()
+    this._mensagem = ProxyFactory.create(
+      new Mensagem(),
+      ['texto'],
+      model => this._mensagemView.update(model)
+    )
     this._mensagemView = new MensagemView('#mensagemView')
     this._mensagemView.update(this._mensagem)
   }
@@ -38,16 +31,16 @@ class NegociacaoController {
     event.preventDefault()
     this._negociacoes.adiciona(this._criaNegociacao())
     this._mensagem.texto = 'Negociação adicionada com sucesso.'
-    // this._negociacoesView.update(this._negociacoes) //Substituído pelo update do Proxy
-    this._mensagemView.update(this._mensagem)
+    // this._negociacoesView.update(this._negociacoes) //Substituído pelo update do ProxyFactory
+    //this._mensagemView.update(this._mensagem) //Substituído pelo update do ProxyFactory
     this._limpaFormulario()
   }
 
   apaga() {
     this._negociacoes.esvazia()
-    //this._negociacoesView.update(this._negociacoes) //Substituído pelo update do Proxy
+    //this._negociacoesView.update(this._negociacoes) //Substituído pelo update do ProxyFactory
     this._mensagem.texto = 'Negociações apagadas com sucesso.'
-    this._mensagemView.update(this._mensagem)
+    //this._mensagemView.update(this._mensagem) //Substituído pelo update do ProxyFactory
   }
 
   _limpaFormulario() {
