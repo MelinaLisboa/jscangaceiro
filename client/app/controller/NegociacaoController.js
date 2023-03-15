@@ -9,31 +9,38 @@ class NegociacaoController {
     this._negociacoes = new Bind(
       new Negociacoes(),
       new NegociacoesView('#negociacoes'),
-      ['adiciona', 'esvazia']
+      'adiciona',
+      'esvazia'
     )
 
     this._mensagem = new Bind(
       new Mensagem(),
       new MensagemView('#mensagemView'),
-      ['texto']
+      'texto'
     )
   }
 
   adiciona(event) {
-    //cancela a submissão do formulário
-    event.preventDefault()
-    this._negociacoes.adiciona(this._criaNegociacao())
-    this._mensagem.texto = 'Negociação adicionada com sucesso.'
-    // this._negociacoesView.update(this._negociacoes) //Substituído pelo update do ProxyFactory
-    //this._mensagemView.update(this._mensagem) //Substituído pelo update do ProxyFactory
-    this._limpaFormulario()
+    try {
+      event.preventDefault() //cancela a submissão do formulário
+      this._negociacoes.adiciona(this._criaNegociacao())
+      this._mensagem.texto = 'Negociação adicionada com sucesso.'
+      this._limpaFormulario()
+    } catch (err) {
+      console.log(err)
+      console.log(err.stack)
+      if (err instanceof DataInvalidaException) {
+        this._mensagem.texto = err.message
+      } else {
+        this._mensagem.texto =
+          'Um erro inesperado aconteceu. Entre em contato com o suporte.'
+      }
+    }
   }
 
   apaga() {
     this._negociacoes.esvazia()
-    //this._negociacoesView.update(this._negociacoes) //Substituído pelo update do ProxyFactory
     this._mensagem.texto = 'Negociações apagadas com sucesso.'
-    //this._mensagemView.update(this._mensagem) //Substituído pelo update do ProxyFactory
   }
 
   _limpaFormulario() {
