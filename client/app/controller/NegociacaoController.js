@@ -57,6 +57,30 @@ class NegociacaoController {
       parseFloat(this._inputValor.value)
     )
   }
+
+  importaNegociacoes() {
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', 'negociacoes/semana')
+
+    xhr.onreadystatechange = () => {
+      //realizaremos configurações aqui
+      if (xhr.readyState == 4) {
+        //Se requisição concluída e resposta pronta (pode ser tb resposta de erro)
+        if (xhr.status == 200) {//código que indica que a operação foi realizada com sucesso
+          JSON
+            .parse(xhr.responseText)
+            .map(objeto => new Negociacao(new Date(objeto.data), objeto.quantidade, objeto.valor))
+            .forEach(negociacao => this._negociacoes.adiciona(negociacao))
+            
+          this._mensagem.texto = 'Negociações importadas com sucesso.'
+        } else {
+          console.log(xhr.responseText)
+          console.log('Não foi possível obter as negociações da semana.')
+        }
+      }
+    }
+    xhr.send() //executa a requisição configurada
+  }
 }
 
 // let data = new Date(
